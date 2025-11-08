@@ -124,6 +124,16 @@ td, th{ vertical-align:middle; }
 }
 
 </style>
+
+  <!-- ✅ 추가: 좌우 스크롤 방지 전용 스타일 -->
+  <style>
+    html, body { max-width: 100%; overflow-x: hidden; }
+    /* 테이블 스크롤 컨테이너(인라인 스타일 override) */
+    .card > div { overflow-y: auto !important; overflow-x: hidden !important; }
+    /* 모바일에서 좌우 드래그로 가로 스크롤 시도 방지 */
+    body { overscroll-behavior-x: none; touch-action: pan-y; }
+  </style>
+  <!-- ✅ 추가 끝 -->
 </head>
 <body>
   <div class="wrap">

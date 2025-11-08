@@ -689,5 +689,51 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
+<!-- ===================== [여기부터 '초기화' 버튼 추가] ===================== -->
+<style>
+/* === 초기화 버튼 스타일 (상단 고정영역 바로 아래) === */
+header.incamart-top .actions{
+  margin-top:8px;
+  display:flex;
+  justify-content:flex-end;
+}
+header.incamart-top .btn-reset{
+  padding:8px 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.15);
+  background:#1a2432;
+  color:#e8f0f7;
+  font-weight:700;
+  font-size:14px;
+}
+header.incamart-top .btn-reset:active{
+  transform:translateY(1px);
+}
+</style>
+
+<script>
+/* === 초기화 버튼 생성 & 동작 === */
+document.addEventListener('DOMContentLoaded', () => {
+  // header(in camart-top)가 이미 만들어진 이후 실행
+  const header = document.querySelector('header.incamart-top');
+  const totals = header ? header.querySelector('.totals') : null;
+  if (header && totals){
+    // 버튼 영역 생성
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    actions.innerHTML = '<button type="button" class="btn-reset" id="btn-reset">초기화</button>';
+    header.appendChild(actions);
+
+    // 클릭 시: 모든 수량 0 → 합계 재계산
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      document.querySelectorAll('input.qty').forEach(inp => { inp.value = '0'; });
+      if (typeof recalc === 'function') recalc();
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+  }
+});
+</script>
+<!-- ===================== [초기화 버튼 추가 끝] ===================== -->
+
 </body>
 </html>

@@ -118,6 +118,157 @@
     .card > div { overflow-y: auto !important; overflow-x: hidden !important; }
     body { overscroll-behavior-x: none; touch-action: pan-y; }
   </style>
+
+  <!-- 주문 버튼 / 메시지 / 모달 스타일 -->
+  <style>
+    .order-main{
+      margin-top:16px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .btn-order-main{
+      width:100%;
+      padding:14px 16px;
+      border-radius:12px;
+      border:none;
+      background:#1f6feb;
+      color:#fff;
+      font-weight:800;
+      font-size:17px;
+    }
+    .btn-order-main:active{
+      transform:translateY(1px);
+    }
+    .order-msg{
+      min-height:18px;
+      font-size:13px;
+    }
+    .order-msg.ok{ color:#4ade80; }
+    .order-msg.err{ color:#fb7185; }
+
+    /* 모달 공통 */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:5000;
+    }
+    .modal.show{ display:flex; }
+
+    .modal-backdrop{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,0.55);
+    }
+    .modal-content{
+      position:relative;
+      z-index:1;
+      width:100%;
+      max-width:480px;
+      margin:0 16px;
+      background:#0f1520;
+      border-radius:14px;
+      border:1px solid var(--border);
+      padding:16px 16px 14px;
+      box-shadow:0 12px 30px rgba(0,0,0,0.4);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .modal-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:4px;
+    }
+    .modal-title{
+      font-size:16px;
+      font-weight:700;
+    }
+    .modal-close{
+      border:none;
+      background:transparent;
+      color:#9fb3c8;
+      font-size:20px;
+      cursor:pointer;
+    }
+    .modal-row{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .modal-row label{
+      font-size:13px;
+      color:var(--muted);
+    }
+    .modal-row input,
+    .modal-row textarea{
+      padding:9px 11px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#0c121a;
+      color:var(--txt);
+      font-size:14px;
+      resize:vertical;
+    }
+    .modal-row textarea{ min-height:56px; }
+
+    .modal-items{
+      max-height:120px;
+      overflow:auto;
+      border-radius:8px;
+      background:#0c121a;
+      border:1px solid var(--border);
+      padding:8px 10px;
+      font-size:13px;
+    }
+    .modal-items ul{
+      margin:0;
+      padding-left:18px;
+    }
+    .modal-items li{
+      margin:2px 0;
+    }
+
+    .modal-totals{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .modal-totals strong{ color:var(--txt); }
+
+    .btn-order-final{
+      margin-top:4px;
+      padding:10px 14px;
+      border-radius:10px;
+      border:none;
+      background:#1f6feb;
+      color:#fff;
+      font-weight:700;
+      font-size:15px;
+    }
+    .btn-order-final:active{
+      transform:translateY(1px);
+    }
+    .modal-msg{
+      min-height:18px;
+      font-size:13px;
+      margin-top:2px;
+    }
+    .modal-msg.ok{ color:#4ade80; }
+    .modal-msg.err{ color:#fb7185; }
+
+    @media (max-width:640px){
+      .modal-content{
+        padding:14px 14px 12px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="wrap">
@@ -154,32 +305,62 @@
         <div class="box"><div class="muted">IDR 총합</div><div class="v" id="sum2-idr">Rp 0</div></div>
       </div>
 
-      <!-- 주문자 정보 + 주문 버튼 -->
-      <div class="order-panel">
-        <div class="order-row">
-          <label>주문자 이름</label>
-          <input type="text" id="order-name" placeholder="이름을 입력해 주세요" />
-        </div>
-        <div class="order-row">
-          <label>전화번호</label>
-          <!-- ✅ 전화번호 id: order-phone -->
-          <input type="text" id="order-phone" placeholder="전화번호" />
-        </div>
-        <div class="order-row">
-          <label>객실</label>
-          <input type="text" id="order-room" placeholder="객실" />
-        </div>
-        <div class="order-row">
-          <label>요청사항</label>
-          <textarea id="order-note" placeholder="수령 요청 시간, 기타 요청사항 등"></textarea>
-        </div>
-        <button type="button" class="btn-order" onclick="submitOrder()">주문하기</button>
+      <!-- 하단 큰 주문 버튼 + 메시지 -->
+      <div class="order-main">
+        <button type="button" class="btn-order-main" onclick="openOrderModal()">
+          주문하기
+        </button>
         <div class="order-msg" id="order-msg"></div>
       </div>
-      <!-- 주문 영역 끝 -->
 
     </div>
   </div>
+
+<!-- 주문 팝업 모달 -->
+<div class="modal" id="order-modal">
+  <div class="modal-backdrop" onclick="closeOrderModal()"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">주문 정보 확인</div>
+      <button type="button" class="modal-close" onclick="closeOrderModal()">×</button>
+    </div>
+
+    <div class="modal-row">
+      <label>주문자 이름</label>
+      <input type="text" id="modal-name" placeholder="이름을 입력해 주세요" />
+    </div>
+    <div class="modal-row">
+      <label>전화번호</label>
+      <input type="text" id="modal-phone" placeholder="전화번호" />
+    </div>
+    <div class="modal-row">
+      <label>객실</label>
+      <input type="text" id="modal-room" placeholder="객실" />
+    </div>
+    <div class="modal-row">
+      <label>요청사항</label>
+      <textarea id="modal-note" placeholder="수령 요청 시간, 기타 요청사항 등"></textarea>
+    </div>
+
+    <div class="modal-row">
+      <label>주문 상품</label>
+      <div class="modal-items">
+        <ul id="modal-items"></ul>
+      </div>
+    </div>
+
+    <div class="modal-totals">
+      <div>총합(₩): <strong id="modal-total-krw">₩ 0</strong></div>
+      <div>총합($): <strong id="modal-total-usd">$ 0</strong></div>
+      <div>총합(Rp): <strong id="modal-total-idr">Rp 0</strong></div>
+    </div>
+
+    <button type="button" class="btn-order-final" onclick="submitOrder()">
+      주문 전송
+    </button>
+    <div class="modal-msg" id="modal-msg"></div>
+  </div>
+</div>
 
 <script>
 // 🔗 주문을 받을 Apps Script 웹앱 주소
@@ -251,22 +432,15 @@ function recalc(){
   document.getElementById('sum2-idr').textContent = fmtIDR(sumI);
 }
 
-// === 주문 전송 함수 ===
-function submitOrder(){
-  const name  = document.getElementById('order-name').value.trim();
-  const phone = document.getElementById('order-phone').value.trim();
-  const room  = document.getElementById('order-room').value.trim();
-  const note  = document.getElementById('order-note').value.trim();
-  const msgEl = document.getElementById('order-msg');
+// === 모달에서 쓸 마지막 주문 데이터 (전역변수) ===
+let lastOrderItems = [];
+let lastOrderTotals = { krw:0, usd:0, idr:0 };
 
+// 큰 주문 버튼 클릭 → 팝업 열기
+function openOrderModal(){
+  const msgEl = document.getElementById('order-msg');
   msgEl.textContent = '';
   msgEl.className = 'order-msg';
-
-  if (!name || !room){
-    msgEl.textContent = '이름과 객실은 필수입니다.';
-    msgEl.classList.add('err');
-    return;
-  }
 
   const items = [];
   document.querySelectorAll('input.qty').forEach(inp => {
@@ -297,23 +471,70 @@ function submitOrder(){
     sumI += (it.unit_idr || 0) * it.qty;
   });
 
+  lastOrderItems = items;
+  lastOrderTotals = { krw: sumK, usd: sumU, idr: sumI };
+
+  // 팝업 상품 목록 / 합계 채우기
+  const listEl = document.getElementById('modal-items');
+  listEl.innerHTML = items.map(it => `<li>${it.name} × ${it.qty}</li>`).join('');
+
+  document.getElementById('modal-total-krw').textContent = fmtKRW(sumK);
+  document.getElementById('modal-total-usd').textContent = fmtUSD(sumU);
+  document.getElementById('modal-total-idr').textContent = fmtIDR(sumI);
+
+  // 이전 메시지 초기화
+  document.getElementById('modal-msg').textContent = '';
+  document.getElementById('modal-msg').className = 'modal-msg';
+
+  // 모달 열기
+  document.getElementById('order-modal').classList.add('show');
+}
+
+// 모달 닫기
+function closeOrderModal(){
+  document.getElementById('order-modal').classList.remove('show');
+}
+
+// === 최종 "주문 전송" ===
+function submitOrder(){
+  const name  = document.getElementById('modal-name').value.trim();
+  const phone = document.getElementById('modal-phone').value.trim();
+  const room  = document.getElementById('modal-room').value.trim();
+  const note  = document.getElementById('modal-note').value.trim();
+  const msgEl = document.getElementById('modal-msg');
+
+  msgEl.textContent = '';
+  msgEl.className = 'modal-msg';
+
+  if (!name || !room){
+    msgEl.textContent = '이름과 객실은 필수입니다.';
+    msgEl.classList.add('err');
+    return;
+  }
+
+  if (!lastOrderItems || lastOrderItems.length === 0){
+    msgEl.textContent = '주문 상품이 없습니다. 다시 수량을 선택해 주세요.';
+    msgEl.classList.add('err');
+    return;
+  }
+
   const payload = {
     type: 'order',
     name,
     phone,
     room,
     note,
-    items,
+    items: lastOrderItems,
     total: {
-      krw: sumK,
-      usd: sumU,
-      idr: sumI
+      krw: lastOrderTotals.krw,
+      usd: lastOrderTotals.usd,
+      idr: lastOrderTotals.idr
     },
     userAgent: navigator.userAgent,
     timestamp: new Date().toISOString()
   };
 
-  const btn = document.querySelector('.btn-order');
+  const btn = document.querySelector('.btn-order-final');
   btn.disabled = true;
   btn.textContent = '전송 중...';
 
@@ -328,15 +549,32 @@ function submitOrder(){
     msgEl.textContent = '주문이 접수되었습니다. 잠시만 기다려 주세요 :)';
     msgEl.classList.add('ok');
 
+    // 수량 초기화 + 합계 리셋
     document.querySelectorAll('input.qty').forEach(inp => { inp.value = '0'; });
     if (typeof recalc === 'function') recalc();
+
+    // 입력값 초기화
+    document.getElementById('modal-note').value = '';
+    // 이름/전화/객실은 직전 값 유지할지 말지 선택 가능, 여기선 유지
+
+    // 메인쪽 메시지도 업데이트
+    const mainMsg = document.getElementById('order-msg');
+    if (mainMsg){
+      mainMsg.textContent = '주문이 접수되었습니다.';
+      mainMsg.className = 'order-msg ok';
+    }
+
+    // 잠시 후 모달 닫기
+    setTimeout(() => {
+      closeOrderModal();
+    }, 800);
   }).catch(err => {
     console.error(err);
     msgEl.textContent = '전송 중 오류가 발생했습니다. 다시 시도해 주세요.';
     msgEl.classList.add('err');
   }).finally(() => {
     btn.disabled = false;
-    btn.textContent = '주문하기';
+    btn.textContent = '주문 전송';
   });
 }
 
@@ -578,81 +816,6 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
-<style>
-/* 초기화 버튼 + 주문 패널 스타일 */
-header.incamart-top .actions{
-  margin-top:8px;
-  display:flex;
-  justify-content:flex-end;
-}
-header.incamart-top .btn-reset{
-  padding:8px 12px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.15);
-  background:#1a2432;
-  color:#e8f0f7;
-  font-weight:700;
-  font-size:14px;
-}
-header.incamart-top .btn-reset:active{
-  transform:translateY(1px);
-}
-
-.order-panel{
-  margin-top:16px;
-  padding:12px;
-  border-radius:12px;
-  background:#0f1520;
-  border:1px solid var(--border);
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-.order-row{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-.order-row label{
-  font-size:13px;
-  color:var(--muted);
-}
-.order-row input,
-.order-row textarea{
-  padding:10px 12px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#0c121a;
-  color:var(--txt);
-  font-size:14px;
-  resize:vertical;
-}
-.btn-order{
-  margin-top:4px;
-  padding:10px 14px;
-  border-radius:10px;
-  border:none;
-  background:#1f6feb;
-  color:#fff;
-  font-weight:700;
-  font-size:15px;
-}
-.btn-order:active{
-  transform:translateY(1px);
-}
-.order-msg{
-  min-height:18px;
-  font-size:13px;
-  margin-top:4px;
-}
-.order-msg.ok{ color:#4ade80; }
-.order-msg.err{ color:#fb7185; }
-
-@media (max-width:640px){
-  .order-panel{ padding:10px; }
-}
-</style>
-
 <script>
 // 초기화 버튼 생성 & 동작
 document.addEventListener('DOMContentLoaded', () => {
@@ -672,6 +835,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
+
+<style>
+/* 초기화 버튼 스타일 */
+header.incamart-top .actions{
+  margin-top:8px;
+  display:flex;
+  justify-content:flex-end;
+}
+header.incamart-top .btn-reset{
+  padding:8px 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.15);
+  background:#1a2432;
+  color:#e8f0f7;
+  font-weight:700;
+  font-size:14px;
+}
+header.incamart-top .btn-reset:active{
+  transform:translateY(1px);
+}
+</style>
 
 </body>
 </html>

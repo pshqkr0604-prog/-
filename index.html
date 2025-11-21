@@ -31,7 +31,6 @@
       input.qty{width:100%;padding:14px;border-radius:12px;font-size:18px}
       .stock{display:none}
 
-      /* Hide unit price (KRW/USD/IDR) and per-row totals on mobile */
       thead th:nth-child(2),
       thead th:nth-child(3),
       thead th:nth-child(4),
@@ -47,11 +46,9 @@
         display:none;
       }
 
-      /* Make "수량" column left-aligned next to 상품명 for better reachability */
       thead th:nth-child(5){text-align:left}
       tbody td:nth-child(5){text-align:left}
 
-      /* Totals layout: single column stack */
       .totals{grid-template-columns:1fr;gap:6px}
       .box{padding:12px}
       .v{font-size:22px}
@@ -59,9 +56,8 @@
 
   </style>
   <style>
-  /* ===== UX FIXES (non-functional CSS only) ===== */
+  /* ===== UX FIXES ===== */
 
-  /* 1) Quantity input: prevent shrinking, ensure visibility, mobile keypad */
   input.qty{
     box-sizing:border-box;
     display:block;
@@ -70,7 +66,7 @@
     min-height:44px;
     height:48px;
     padding:12px 14px;
-    font-size:18px; /* prevent iOS zoom */
+    font-size:18px;
     line-height:1.2;
     color:#111;
     background:#fff;
@@ -80,18 +76,15 @@
     appearance:none;
   }
 
-  /* Remove number spinners */
   input[type=number]::-webkit-outer-spin-button,
   input[type=number]::-webkit-inner-spin-button{
     -webkit-appearance:none; margin:0;
   }
   input[type=number]{ -moz-appearance:textfield; }
 
-  /* Keep table stable while typing */
   table{ table-layout:auto; }
   td, th{ vertical-align:middle; }
 
-  /* 2) Totals bar: sticky at top, single-row (3 currencies) */
   .totals{
     position:sticky;
     top:0;
@@ -106,7 +99,6 @@
     box-shadow: 0 3px 8px rgba(0,0,0,0.06);
   }
 
-  /* Compact total boxes for a single line look */
   .totals .box{
     margin:0;
     padding:10px 12px;
@@ -114,26 +106,18 @@
   }
   .totals .v{ font-size:18px; font-weight:700; }
 
-  /* 3) Mobile refinements */
   @media (max-width: 640px){
-    /* Keep only qty visible beside name; (already hidden earlier) */
     input.qty{ height:52px; font-size:20px; }
-
-    /* Ensure sticky totals stays on top on mobile as well */
     .totals{ grid-template-columns: repeat(3, 1fr); }
   }
-
   </style>
 
-  <!-- ✅ 추가: 좌우 스크롤 방지 전용 스타일 -->
+  <!-- 좌우 스크롤 방지 -->
   <style>
     html, body { max-width: 100%; overflow-x: hidden; }
-    /* 테이블 스크롤 컨테이너(인라인 스타일 override) */
     .card > div { overflow-y: auto !important; overflow-x: hidden !important; }
-    /* 모바일에서 좌우 드래그로 가로 스크롤 시도 방지 */
     body { overscroll-behavior-x: none; touch-action: pan-y; }
   </style>
-  <!-- ✅ 추가 끝 -->
 </head>
 <body>
   <div class="wrap">
@@ -170,7 +154,7 @@
         <div class="box"><div class="muted">IDR 총합</div><div class="v" id="sum2-idr">Rp 0</div></div>
       </div>
 
-      <!-- ✅ 주문자 정보 + 주문 버튼 -->
+      <!-- 주문자 정보 + 주문 버튼 -->
       <div class="order-panel">
         <div class="order-row">
           <label>주문자 이름</label>
@@ -178,6 +162,7 @@
         </div>
         <div class="order-row">
           <label>전화번호</label>
+          <!-- ✅ 전화번호 id: order-phone -->
           <input type="text" id="order-phone" placeholder="전화번호" />
         </div>
         <div class="order-row">
@@ -191,121 +176,31 @@
         <button type="button" class="btn-order" onclick="submitOrder()">주문하기</button>
         <div class="order-msg" id="order-msg"></div>
       </div>
-      <!-- ✅ 주문 영역 끝 -->
+      <!-- 주문 영역 끝 -->
 
     </div>
   </div>
 
 <script>
-// 🔗 주문을 받을 Apps Script 웹앱 주소 (배포 후 URL로 교체)
+// 🔗 주문을 받을 Apps Script 웹앱 주소
 const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbxfmDdOU1WFc41Sy_cPdwcjvlL0jebb4l5fwO3HteVxqQfOPWtbCWf8ImvWnYvHmvPu/exec";
 
 const PRODUCTS = [
-  {
-      "name": "엘립스 헤어오일",
-      "krw": 10000.0,
-      "usd": 7.0,
-      "idr": 100000.0,
-      "stock": "14"
-    },
-    {
-      "name": "WOCA 초콜릿",
-      "krw": 2500.0,
-      "usd": 2.0,
-      "idr": 30000.0,
-      "stock": "28"
-    },
-    {
-      "name": "YABA 그래놀라",
-      "krw": 2500.0,
-      "usd": 2,
-      "idr": 30000.0,
-      "stock": "28"
-    },
-    {
-      "name": "YABA 캐슈넛",
-      "krw": 1500.0,
-      "usd": 1.5,
-      "idr": 20000.0,
-      "stock": "28"
-    },
-    {
-      "name": "메루발리 코코넛칩",
-      "krw": 1500.0,
-      "usd": 1.5,
-      "idr": 20000.0,
-      "stock": "24"
-    },
-    {
-      "name": "큐텔라싱콘 감자칩",
-      "krw": 500.0,
-      "usd": 0.5,
-      "idr": 5000.0,
-      "stock": "24"
-    }, 
-    {
-      "name": "병맥주",
-      "krw": 2500.0,
-      "usd": 2,
-      "idr": 30000.0,
-      "stock": "150(144)"
-    },
-      {
-      "name": "캔맥주",
-      "krw": 2000.0,
-      "usd": 1.5,
-      "idr": 25000.0,
-      "stock": "150(144)"
-    },
-    {
-      "name": "모든 음료",
-      "krw": 500.0,
-      "usd": 0.5,
-      "idr": 5000.0,
-      "stock": "24"
-    },
-    {
-      "name": "모든 작은 라면",
-      "krw": 1500.0,
-      "usd": 1.0,
-      "idr": 15000.0,
-      "stock": "18"
-    },
-    {
-      "name": "모든 큰라면",
-      "krw": 2000.0,
-      "usd": 1.5,
-      "idr": 25000.0,
-      "stock": "33"
-    },
-    {
-      "name": "모기기피제",
-      "krw": 1500.0,
-      "usd": 1.0,
-      "idr": 15000.0,
-      "stock": "14"
-    },
-    {
-      "name": "텀블러 단일 구매시 검정 OR 흰색",
-      "krw": 20000.0,
-      "usd": 15.0,
-      "idr": 200000.0,
-      "stock": "nan"
-    },
-    {
-      "name": "텀블러 SET 구매시 검정 + 흰색",
-      "krw": 35000.0,
-      "usd": 25.0,
-      "idr": 350000.0,
-      "stock": "nan"
-    },
-    {
-      "name": "에코백",
-      "krw": 10000.0,
-      "usd": 7.0,
-      "idr": 100000.0,
-      "stock": "nan"
-    }
+  {"name":"엘립스 헤어오일","krw":10000.0,"usd":7.0,"idr":100000.0,"stock":"14"},
+  {"name":"WOCA 초콜릿","krw":2500.0,"usd":2.0,"idr":30000.0,"stock":"28"},
+  {"name":"YABA 그래놀라","krw":2500.0,"usd":2,"idr":30000.0,"stock":"28"},
+  {"name":"YABA 캐슈넛","krw":1500.0,"usd":1.5,"idr":20000.0,"stock":"28"},
+  {"name":"메루발리 코코넛칩","krw":1500.0,"usd":1.5,"idr":20000.0,"stock":"24"},
+  {"name":"큐텔라싱콘 감자칩","krw":500.0,"usd":0.5,"idr":5000.0,"stock":"24"},
+  {"name":"병맥주","krw":2500.0,"usd":2,"idr":30000.0,"stock":"150(144)"},
+  {"name":"캔맥주","krw":2000.0,"usd":1.5,"idr":25000.0,"stock":"150(144)"},
+  {"name":"모든 음료","krw":500.0,"usd":0.5,"idr":5000.0,"stock":"24"},
+  {"name":"모든 작은 라면","krw":1500.0,"usd":1.0,"idr":15000.0,"stock":"18"},
+  {"name":"모든 큰라면","krw":2000.0,"usd":1.5,"idr":25000.0,"stock":"33"},
+  {"name":"모기기피제","krw":1500.0,"usd":1.0,"idr":15000.0,"stock":"14"},
+  {"name":"텀블러 단일 구매시 검정 OR 흰색","krw":20000.0,"usd":15.0,"idr":200000.0,"stock":"nan"},
+  {"name":"텀블러 SET 구매시 검정 + 흰색","krw":35000.0,"usd":25.0,"idr":350000.0,"stock":"nan"},
+  {"name":"에코백","krw":10000.0,"usd":7.0,"idr":100000.0,"stock":"nan"}
 ];
 
 function fmtKRW(v){return '₩ ' + (Math.round(v)||0).toLocaleString('ko-KR');}
@@ -358,17 +253,17 @@ function recalc(){
 
 // === 주문 전송 함수 ===
 function submitOrder(){
-  const name = document.getElementById('order-name').value.trim();
+  const name  = document.getElementById('order-name').value.trim();
   const phone = document.getElementById('order-phone').value.trim();
-  const room = document.getElementById('order-room').value.trim();
-  const note = document.getElementById('order-note').value.trim();
+  const room  = document.getElementById('order-room').value.trim();
+  const note  = document.getElementById('order-note').value.trim();
   const msgEl = document.getElementById('order-msg');
 
   msgEl.textContent = '';
   msgEl.className = 'order-msg';
 
   if (!name || !room){
-    msgEl.textContent = '이름과 전화번호 객실은 필수입니다.';
+    msgEl.textContent = '이름과 객실은 필수입니다.';
     msgEl.classList.add('err');
     return;
   }
@@ -435,7 +330,6 @@ function submitOrder(){
 
     document.querySelectorAll('input.qty').forEach(inp => { inp.value = '0'; });
     if (typeof recalc === 'function') recalc();
-    // document.getElementById('order-note').value = ''; // 필요하면 요청사항 초기화
   }).catch(err => {
     console.error(err);
     msgEl.textContent = '전송 중 오류가 발생했습니다. 다시 시도해 주세요.';
@@ -451,9 +345,8 @@ recalc();
 </script>
 
 <style>
-/* ===== Sticky Title + Totals (under title) ===== */
+/* Sticky title + totals */
 @media (max-width: 640px){
-  /* make title stick */
   h1{
     position: sticky;
     top: 0;
@@ -462,10 +355,9 @@ recalc();
     padding: 12px 16px;
     background: inherit;
   }
-  /* totals under title */
   .totals{
     position: sticky;
-    top: 56px;          /* sits right under the sticky title */
+    top: 56px;
     z-index: 1000;
     width: 100%;
     left: 0;
@@ -475,14 +367,12 @@ recalc();
     border-bottom: 1px solid rgba(255,255,255,0.08);
     box-shadow: 0 3px 10px rgba(0,0,0,0.18);
   }
-  /* give space so first rows aren't hidden behind sticky bars */
   .wrap{ padding-top: 112px; }
 }
 
-/* ===== Quantity column stability ===== */
 table{ table-layout: fixed; width: 100%; }
 thead th:nth-child(5), tbody td:nth-child(5){
-  width: 120px;  /* fixed width for 수량 column */
+  width: 120px;
 }
 input.qty{
   width: 100%;
@@ -493,22 +383,19 @@ input.qty{
   border-radius: 14px;
   font-size: 20px;
   line-height: 1.2;
-  transition: none;      /* prevent focus animations that cause jump */
+  transition: none;
 }
 input.qty:focus{
   outline: none;
   border-color: #bbb;
   box-shadow: 0 0 0 2px rgba(0,0,0,0.05) inset;
-  transform: none;       /* avoid shrink/scale on focus */
+  transform: none;
 }
-
 </style>
 <style>
-/* ===== Force TOTALS to very top on mobile (always visible) ===== */
+/* totals를 최상단 고정 */
 @media (max-width: 640px){
   :root{ --totals-height: 84px; }
-
-  /* Make totals fixed at viewport top regardless of original CSS */
   .totals{
     position: fixed !important;
     top: 0 !important;
@@ -521,26 +408,18 @@ input.qty:focus{
     margin: 0;
     border-radius: 0;
   }
-  /* Ensure each totals box is compact to fit one row */
   .totals{ grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .totals .box{ padding: 10px 12px; }
   .totals .v{ font-size: 18px; }
-
-  /* Give page content spacing so it's not hidden behind fixed totals */
   body, .wrap{ padding-top: calc(var(--totals-height) + 16px) !important; }
-
-  /* Keep title visible below totals (no extra sticky behavior needed) */
   h1{ position: static !important; margin-top: 0; }
-
-  /* If any "bottom-sticky" style exists, neutralize it on mobile */
   .totals.bottom, .totals.sticky-bottom, footer .totals{
     display: none !important;
   }
 }
-
 </style>
 <style>
-/* ===== Combine title + totals as a single top fixed block ===== */
+/* header.incamart-top 래핑 */
 @media (max-width: 640px){
   header.incamart-top{
     position: fixed;
@@ -570,7 +449,7 @@ input.qty:focus{
 </style>
 
 <script>
-// ===== Clear '0' when focusing qty input, restore 0 if left empty =====
+// qty 포커스 시 0 제거/복원 + header 래핑
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('input.qty').forEach(input => {
     input.addEventListener('focus', () => {
@@ -581,7 +460,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Move h1 and totals together into a fixed header wrapper
   const h1 = document.querySelector('h1');
   const totals = document.querySelector('.totals');
   if (h1 && totals) {
@@ -594,34 +472,28 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-
 <script>
-// ===== Keep header (title + totals) visible even when mobile keyboard opens =====
+// header가 키보드 열려도 보이도록 조정
 (function(){
   function adjustHeader() {
     const header = document.querySelector('header.incamart-top');
     if (!header) return;
-    // Force fixed + top pin
     header.style.position = 'fixed';
     header.style.zIndex = '4000';
     header.style.left = '0';
     header.style.top = '0';
 
-    // Use VisualViewport if available (Android/Chrome, iOS Safari)
     if (window.visualViewport) {
       const vv = window.visualViewport;
-      // Translate header into the *visible* viewport area
       const tx = vv.offsetLeft || 0;
       const ty = vv.offsetTop || 0;
       header.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
       header.style.width = vv.width + 'px';
     } else {
-      // Fallback: no transform
       header.style.transform = 'translate(0,0)';
       header.style.width = '100%';
     }
 
-    // Ensure content is not hidden under header
     const h = header.getBoundingClientRect().height;
     const wrap = document.querySelector('.wrap') || document.body;
     wrap.style.paddingTop = (h + 12) + 'px';
@@ -630,15 +502,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const ready = () => {
     adjustHeader();
-    // Re-adjust on viewport changes, scroll, and orientation changes
     if (window.visualViewport) {
       visualViewport.addEventListener('resize', adjustHeader);
       visualViewport.addEventListener('scroll', adjustHeader);
     }
     window.addEventListener('resize', adjustHeader);
     window.addEventListener('orientationchange', adjustHeader);
-
-    // Re-run after input focus changes (keyboard open/close)
     document.addEventListener('focusin', adjustHeader);
     document.addEventListener('focusout', adjustHeader);
   };
@@ -652,10 +521,9 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <style>
-/* ===== Solid backdrop for header to avoid blending with content ===== */
 @media (max-width: 640px){
   header.incamart-top{
-    background: rgba(10,14,18,0.98) !important; /* solid dark */
+    background: rgba(10,14,18,0.98) !important;
     backdrop-filter: none;
     border-bottom: 1px solid rgba(255,255,255,0.06);
   }
@@ -668,7 +536,6 @@ document.addEventListener('DOMContentLoaded', () => {
   header.incamart-top .totals .box{ background: #111821; }
 }
 
-/* ===== Compact mode when keyboard is open ===== */
 @media (max-width: 640px){
   body.kb-open header.incamart-top{
     padding: 6px 8px !important;
@@ -690,13 +557,12 @@ document.addEventListener('DOMContentLoaded', () => {
 </style>
 
 <script>
-// Shorten title and ensure visibility
+// 제목 짧게 + 키보드 열림 상태 class
 document.addEventListener('DOMContentLoaded', () => {
   const h1 = document.querySelector('header.incamart-top h1, h1');
   if (h1) h1.textContent = '(가격 자동 합산)';
 });
 
-// Add/remove compact mode on keyboard open/close
 (function(){
   function setKbOpen(open){
     document.body.classList.toggle('kb-open', !!open);
@@ -712,9 +578,8 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
-<!-- ===================== [여기부터 '초기화' 버튼 추가] ===================== -->
 <style>
-/* === 초기화 버튼 스타일 (상단 고정영역 바로 아래) === */
+/* 초기화 버튼 + 주문 패널 스타일 */
 header.incamart-top .actions{
   margin-top:8px;
   display:flex;
@@ -733,7 +598,6 @@ header.incamart-top .btn-reset:active{
   transform:translateY(1px);
 }
 
-/* ===== 주문 패널 스타일 ===== */
 .order-panel{
   margin-top:16px;
   padding:12px;
@@ -784,14 +648,13 @@ header.incamart-top .btn-reset:active{
 .order-msg.ok{ color:#4ade80; }
 .order-msg.err{ color:#fb7185; }
 
-/* 모바일에서 여백 살짝 줄이기 */
 @media (max-width:640px){
   .order-panel{ padding:10px; }
 }
 </style>
 
 <script>
-/* === 초기화 버튼 생성 & 동작 === */
+// 초기화 버튼 생성 & 동작
 document.addEventListener('DOMContentLoaded', () => {
   const header = document.querySelector('header.incamart-top');
   const totals = header ? header.querySelector('.totals') : null;
@@ -809,7 +672,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
-<!-- ===================== [초기화 버튼 추가 끝] ===================== -->
 
 </body>
 </html>

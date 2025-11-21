@@ -177,12 +177,16 @@
           <input type="text" id="order-name" placeholder="이름을 입력해 주세요" />
         </div>
         <div class="order-row">
-          <label>객실 / 팀명</label>
-          <input type="text" id="order-room" placeholder="객실번호 또는 팀명" />
+          <label>전화번호</label>
+          <input type="text" id="order-room" placeholder="전화번호" />
+        </div>
+        <div class="order-row">
+          <label>객실</label>
+          <input type="text" id="order-room" placeholder="객실" />
         </div>
         <div class="order-row">
           <label>요청사항</label>
-          <textarea id="order-note" placeholder="빼고 싶은 재료, 기타 요청사항"></textarea>
+          <textarea id="order-note" placeholder="수령 요청 시간, 기타 요청사항 등"></textarea>
         </div>
         <button type="button" class="btn-order" onclick="submitOrder()">주문하기</button>
         <div class="order-msg" id="order-msg"></div>
@@ -363,7 +367,7 @@ function submitOrder(){
   msgEl.className = 'order-msg';
 
   if (!name || !room){
-    msgEl.textContent = '이름과 객실/팀명은 필수입니다.';
+    msgEl.textContent = '이름과 전화번호 객실은 필수입니다.';
     msgEl.classList.add('err');
     return;
   }

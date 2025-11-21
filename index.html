@@ -4,10 +4,17 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>인카마트 가격표 (주문서)</title>
+
+  <!-- 기본 스타일 -->
   <style>
     :root{--bg:#0b0f14;--card:#121821;--muted:#9fb3c8;--txt:#e8f0f7;--border:#1f2a38;}
     *{box-sizing:border-box}
-    body{margin:0;background:#0b0f14;color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Malgun Gothic,sans-serif}
+    body{
+      margin:0;
+      background:#0b0f14;
+      color:var(--txt);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Malgun Gothic,sans-serif
+    }
     .wrap{max-width:1100px;margin:28px auto;padding:0 12px}
     h1{margin:0 0 12px 0;font-size:20px}
     .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px}
@@ -15,15 +22,66 @@
     th,td{border-bottom:1px solid #1b2431;padding:10px 8px;font-size:14px}
     thead th{position:sticky;top:0;background:#0f1520;text-align:left}
     td.right,th.right{text-align:right}
-    input.qty{width:80px;padding:8px;border-radius:8px;border:1px solid var(--border);background:#0c121a;color:var(--txt)}
     tfoot td{font-weight:800}
     .muted{color:var(--muted)}
     .stock{font-size:12px;color:#b7c8d8}
-    .totals{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
-    .box{background:#0f1520;border:1px solid var(--border);border-radius:10px;padding:10px}
+    .totals{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin-top:10px;
+      background:#0f1520;
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px;
+    }
+    .box{
+      background:#0f1520;
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px;
+    }
     .v{font-size:20px;font-weight:900}
-  
-    /* === Mobile-first compact view (<= 640px) === */
+
+    /* 수량 입력 UX */
+    input.qty{
+      box-sizing:border-box;
+      display:block;
+      width:100%;
+      min-width:0;
+      min-height:44px;
+      height:48px;
+      padding:12px 14px;
+      font-size:18px;
+      line-height:1.2;
+      color:#111;
+      background:#fff;
+      border:1px solid #ddd;
+      border-radius:12px;
+      -webkit-appearance:none;
+      appearance:none;
+    }
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button{
+      -webkit-appearance:none;
+      margin:0;
+    }
+    input[type=number]{ -moz-appearance:textfield; }
+
+    table{ table-layout:fixed; }
+    td, th{ vertical-align:middle; }
+
+    thead th:nth-child(5), tbody td:nth-child(5){
+      width:120px;
+    }
+    input.qty:focus{
+      outline:none;
+      border-color:#bbb;
+      box-shadow:0 0 0 2px rgba(0,0,0,0.05) inset;
+      transform:none;
+    }
+
+    /* 모바일 기본 테이블 축약 */
     @media (max-width: 640px){
       .wrap{max-width:720px;margin:16px auto;padding:0 10px}
       h1{font-size:16px;margin-bottom:10px}
@@ -48,68 +106,35 @@
 
       thead th:nth-child(5){text-align:left}
       tbody td:nth-child(5){text-align:left}
-
-      .totals{grid-template-columns:1fr;gap:6px}
-      .box{padding:12px}
-      .v{font-size:22px}
     }
-
   </style>
+
+  <!-- 합계바(상단)용 추가 스타일 -->
   <style>
-  /* ===== UX FIXES ===== */
+    .totals{
+      position:sticky;
+      top:0;
+      z-index:999;
+      background:#fff;
+      padding:8px 10px;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items:center;
+      gap:8px;
+      border-bottom:1px solid #eee;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+    }
+    .totals .box{
+      margin:0;
+      padding:10px 12px;
+      border-radius:10px;
+    }
+    .totals .v{ font-size:18px; font-weight:700; }
 
-  input.qty{
-    box-sizing:border-box;
-    display:block;
-    width:100%;
-    min-width:0;
-    min-height:44px;
-    height:48px;
-    padding:12px 14px;
-    font-size:18px;
-    line-height:1.2;
-    color:#111;
-    background:#fff;
-    border:1px solid #ddd;
-    border-radius:12px;
-    -webkit-appearance:none;
-    appearance:none;
-  }
-
-  input[type=number]::-webkit-outer-spin-button,
-  input[type=number]::-webkit-inner-spin-button{
-    -webkit-appearance:none; margin:0;
-  }
-  input[type=number]{ -moz-appearance:textfield; }
-
-  table{ table-layout:auto; }
-  td, th{ vertical-align:middle; }
-
-  .totals{
-    position:sticky;
-    top:0;
-    z-index:999;
-    background:#fff;
-    padding:8px 10px;
-    display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    align-items:center;
-    gap:8px;
-    border-bottom:1px solid #eee;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.06);
-  }
-
-  .totals .box{
-    margin:0;
-    padding:10px 12px;
-    border-radius:10px;
-  }
-  .totals .v{ font-size:18px; font-weight:700; }
-
-  @media (max-width: 640px){
-    input.qty{ height:52px; font-size:20px; }
-    .totals{ grid-template-columns: repeat(3, 1fr); }
-  }
+    @media (max-width: 640px){
+      input.qty{ height:52px; font-size:20px; }
+      .totals{ grid-template-columns: repeat(3, 1fr); }
+    }
   </style>
 
   <!-- 좌우 스크롤 방지 -->
@@ -269,6 +294,107 @@
       }
     }
   </style>
+
+  <!-- 🔹 모바일용: 헤더(제목 + 합계 + 초기화) 컴팩트 & 상단 고정 -->
+  <style>
+    /* 초기화 버튼 스타일 (공통) */
+    header.incamart-top .actions{
+      margin-top:8px;
+      display:flex;
+      justify-content:flex-end;
+    }
+    header.incamart-top .btn-reset{
+      padding:8px 12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.15);
+      background:#1a2432;
+      color:#e8f0f7;
+      font-weight:700;
+      font-size:14px;
+    }
+    header.incamart-top .btn-reset:active{
+      transform:translateY(1px);
+    }
+
+    /* 모바일에서 헤더를 얇게 + 항상 고정 */
+    @media (max-width:640px){
+      header.incamart-top{
+        position:fixed !important;
+        top:0;
+        left:0;
+        right:0;
+        z-index:3000;
+        padding:4px 6px 6px 6px !important;
+        box-shadow:0 2px 6px rgba(0,0,0,0.35);
+        background:rgba(10,14,18,0.98) !important;
+        display:flex;
+        flex-direction:column;
+        gap:4px;
+        border-bottom:1px solid rgba(255,255,255,0.06);
+      }
+      header.incamart-top h1{
+        font-size:14px !important;
+        margin:0 0 2px 2px !important;
+        text-align:left;
+      }
+      header.incamart-top .totals{
+        position:static !important;
+        padding:0 !important;
+        border:none !important;
+        box-shadow:none !important;
+        grid-template-columns:repeat(3,1fr);
+        gap:4px !important;
+      }
+      header.incamart-top .totals .box{
+        padding:4px 6px !important;
+        border-radius:8px !important;
+        background:#111821;
+      }
+      header.incamart-top .totals .box .muted{
+        font-size:11px !important;
+      }
+      header.incamart-top .totals .box .v{
+        font-size:15px !important;
+      }
+      header.incamart-top .actions{
+        margin-top:2px !important;
+      }
+      header.incamart-top .btn-reset{
+        padding:5px 10px !important;
+        font-size:12px !important;
+      }
+      body, .wrap{
+        padding-top:96px !important; /* 헤더 높이에 맞게 여백 */
+      }
+    }
+
+    /* 모바일 + 키보드 열렸을 때(body.kb-open): 더 압축 */
+    @media (max-width:640px){
+      body.kb-open header.incamart-top{
+        padding:2px 4px 4px 4px !important;
+      }
+      body.kb-open header.incamart-top h1{
+        height:0;
+        margin:0;
+        padding:0;
+        font-size:0;
+        overflow:hidden;
+      }
+      body.kb-open header.incamart-top .totals .box{
+        padding:3px 4px !important;
+      }
+      body.kb-open header.incamart-top .totals .box .muted{
+        font-size:10px !important;
+      }
+      body.kb-open header.incamart-top .totals .box .v{
+        font-size:13px !important;
+      }
+      body.kb-open header.incamart-top .btn-reset{
+        padding:3px 8px !important;
+        font-size:11px !important;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="wrap">
@@ -299,6 +425,8 @@
           </tfoot>
         </table>
       </div>
+
+      <!-- 합계 박스 (나중에 header로 이동됨) -->
       <div class="totals">
         <div class="box"><div class="muted">KRW 총합</div><div class="v" id="sum2-krw">₩ 0</div></div>
         <div class="box"><div class="muted">USD 총합</div><div class="v" id="sum2-usd">$ 0</div></div>
@@ -316,51 +444,51 @@
     </div>
   </div>
 
-<!-- 주문 팝업 모달 -->
-<div class="modal" id="order-modal">
-  <div class="modal-backdrop" onclick="closeOrderModal()"></div>
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-title">주문 정보 확인</div>
-      <button type="button" class="modal-close" onclick="closeOrderModal()">×</button>
-    </div>
-
-    <div class="modal-row">
-      <label>주문자 이름</label>
-      <input type="text" id="modal-name" placeholder="이름을 입력해 주세요" />
-    </div>
-    <div class="modal-row">
-      <label>전화번호</label>
-      <input type="text" id="modal-phone" placeholder="전화번호" />
-    </div>
-    <div class="modal-row">
-      <label>객실</label>
-      <input type="text" id="modal-room" placeholder="객실" />
-    </div>
-    <div class="modal-row">
-      <label>요청사항</label>
-      <textarea id="modal-note" placeholder="수령 요청 시간, 기타 요청사항 등"></textarea>
-    </div>
-
-    <div class="modal-row">
-      <label>주문 상품</label>
-      <div class="modal-items">
-        <ul id="modal-items"></ul>
+  <!-- 주문 팝업 모달 -->
+  <div class="modal" id="order-modal">
+    <div class="modal-backdrop" onclick="closeOrderModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">주문 정보 확인</div>
+        <button type="button" class="modal-close" onclick="closeOrderModal()">×</button>
       </div>
-    </div>
 
-    <div class="modal-totals">
-      <div>총합(₩): <strong id="modal-total-krw">₩ 0</strong></div>
-      <div>총합($): <strong id="modal-total-usd">$ 0</strong></div>
-      <div>총합(Rp): <strong id="modal-total-idr">Rp 0</strong></div>
-    </div>
+      <div class="modal-row">
+        <label>주문자 이름</label>
+        <input type="text" id="modal-name" placeholder="이름을 입력해 주세요" />
+      </div>
+      <div class="modal-row">
+        <label>전화번호</label>
+        <input type="text" id="modal-phone" placeholder="전화번호" />
+      </div>
+      <div class="modal-row">
+        <label>객실</label>
+        <input type="text" id="modal-room" placeholder="객실" />
+      </div>
+      <div class="modal-row">
+        <label>요청사항</label>
+        <textarea id="modal-note" placeholder="수령 요청 시간, 기타 요청사항 등"></textarea>
+      </div>
 
-    <button type="button" class="btn-order-final" onclick="submitOrder()">
-      주문 전송
-    </button>
-    <div class="modal-msg" id="modal-msg"></div>
+      <div class="modal-row">
+        <label>주문 상품</label>
+        <div class="modal-items">
+          <ul id="modal-items"></ul>
+        </div>
+      </div>
+
+      <div class="modal-totals">
+        <div>총합(₩): <strong id="modal-total-krw">₩ 0</strong></div>
+        <div>총합($): <strong id="modal-total-usd">$ 0</strong></div>
+        <div>총합(Rp): <strong id="modal-total-idr">Rp 0</strong></div>
+      </div>
+
+      <button type="button" class="btn-order-final" onclick="submitOrder()">
+        주문 전송
+      </button>
+      <div class="modal-msg" id="modal-msg"></div>
+    </div>
   </div>
-</div>
 
 <script>
 // 🔗 주문을 받을 Apps Script 웹앱 주소
@@ -432,11 +560,11 @@ function recalc(){
   document.getElementById('sum2-idr').textContent = fmtIDR(sumI);
 }
 
-// === 모달에서 쓸 마지막 주문 데이터 (전역변수) ===
+// === 모달용 전역 데이터 ===
 let lastOrderItems = [];
 let lastOrderTotals = { krw:0, usd:0, idr:0 };
 
-// 큰 주문 버튼 클릭 → 팝업 열기
+// 큰 주문 버튼 → 모달 열기
 function openOrderModal(){
   const msgEl = document.getElementById('order-msg');
   msgEl.textContent = '';
@@ -474,7 +602,6 @@ function openOrderModal(){
   lastOrderItems = items;
   lastOrderTotals = { krw: sumK, usd: sumU, idr: sumI };
 
-  // 팝업 상품 목록 / 합계 채우기
   const listEl = document.getElementById('modal-items');
   listEl.innerHTML = items.map(it => `<li>${it.name} × ${it.qty}</li>`).join('');
 
@@ -482,20 +609,17 @@ function openOrderModal(){
   document.getElementById('modal-total-usd').textContent = fmtUSD(sumU);
   document.getElementById('modal-total-idr').textContent = fmtIDR(sumI);
 
-  // 이전 메시지 초기화
   document.getElementById('modal-msg').textContent = '';
   document.getElementById('modal-msg').className = 'modal-msg';
 
-  // 모달 열기
   document.getElementById('order-modal').classList.add('show');
 }
 
-// 모달 닫기
 function closeOrderModal(){
   document.getElementById('order-modal').classList.remove('show');
 }
 
-// === 최종 "주문 전송" ===
+// === 최종 주문 전송 ===
 function submitOrder(){
   const name  = document.getElementById('modal-name').value.trim();
   const phone = document.getElementById('modal-phone').value.trim();
@@ -541,33 +665,24 @@ function submitOrder(){
   fetch(ORDER_ENDPOINT, {
     method: 'POST',
     mode: 'no-cors',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   }).then(() => {
     msgEl.textContent = '주문이 접수되었습니다. 잠시만 기다려 주세요 :)';
     msgEl.classList.add('ok');
 
-    // 수량 초기화 + 합계 리셋
     document.querySelectorAll('input.qty').forEach(inp => { inp.value = '0'; });
     if (typeof recalc === 'function') recalc();
 
-    // 입력값 초기화
     document.getElementById('modal-note').value = '';
-    // 이름/전화/객실은 직전 값 유지할지 말지 선택 가능, 여기선 유지
 
-    // 메인쪽 메시지도 업데이트
     const mainMsg = document.getElementById('order-msg');
     if (mainMsg){
       mainMsg.textContent = '주문이 접수되었습니다.';
       mainMsg.className = 'order-msg ok';
     }
 
-    // 잠시 후 모달 닫기
-    setTimeout(() => {
-      closeOrderModal();
-    }, 800);
+    setTimeout(() => { closeOrderModal(); }, 800);
   }).catch(err => {
     console.error(err);
     msgEl.textContent = '전송 중 오류가 발생했습니다. 다시 시도해 주세요.';
@@ -578,116 +693,10 @@ function submitOrder(){
   });
 }
 
-mount(); 
+mount();
 recalc();
-</script>
 
-<style>
-/* Sticky title + totals */
-@media (max-width: 640px){
-  h1{
-    position: sticky;
-    top: 0;
-    z-index: 1001;
-    margin: 0;
-    padding: 12px 16px;
-    background: inherit;
-  }
-  .totals{
-    position: sticky;
-    top: 56px;
-    z-index: 1000;
-    width: 100%;
-    left: 0;
-    right: 0;
-    background: inherit;
-    padding: 8px 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 3px 10px rgba(0,0,0,0.18);
-  }
-  .wrap{ padding-top: 112px; }
-}
-
-table{ table-layout: fixed; width: 100%; }
-thead th:nth-child(5), tbody td:nth-child(5){
-  width: 120px;
-}
-input.qty{
-  width: 100%;
-  min-width: 0 !important;
-  max-width: 100%;
-  height: 52px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  font-size: 20px;
-  line-height: 1.2;
-  transition: none;
-}
-input.qty:focus{
-  outline: none;
-  border-color: #bbb;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.05) inset;
-  transform: none;
-}
-</style>
-<style>
-/* totals를 최상단 고정 */
-@media (max-width: 640px){
-  :root{ --totals-height: 84px; }
-  .totals{
-    position: fixed !important;
-    top: 0 !important;
-    left: 0;
-    right: 0;
-    bottom: auto !important;
-    z-index: 2000;
-    width: 100%;
-    max-width: 100vw;
-    margin: 0;
-    border-radius: 0;
-  }
-  .totals{ grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .totals .box{ padding: 10px 12px; }
-  .totals .v{ font-size: 18px; }
-  body, .wrap{ padding-top: calc(var(--totals-height) + 16px) !important; }
-  h1{ position: static !important; margin-top: 0; }
-  .totals.bottom, .totals.sticky-bottom, footer .totals{
-    display: none !important;
-  }
-}
-</style>
-<style>
-/* header.incamart-top 래핑 */
-@media (max-width: 640px){
-  header.incamart-top{
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 3000;
-    background: inherit;
-    padding: 8px 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  }
-  header.incamart-top h1{
-    margin: 0 0 4px 0;
-    font-size: 18px;
-    text-align: left;
-  }
-  header.incamart-top .totals{
-    position: static !important;
-    margin: 0;
-    border: none;
-    box-shadow: none;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-  }
-  body, .wrap{ padding-top: 120px !important; }
-}
-</style>
-
-<script>
-// qty 포커스 시 0 제거/복원 + header 래핑
+// === qty 포커스 0 제거/복원 + 헤더 래핑 + 초기화 버튼 생성 ===
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('input.qty').forEach(input => {
     input.addEventListener('focus', () => {
@@ -706,12 +715,22 @@ document.addEventListener('DOMContentLoaded', () => {
     h1.parentNode.insertBefore(header, h1);
     header.appendChild(h1);
     header.appendChild(totals);
+
+    // 초기화 버튼 영역 생성
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    actions.innerHTML = '<button type="button" class="btn-reset" id="btn-reset">초기화</button>';
+    header.appendChild(actions);
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      document.querySelectorAll('input.qty').forEach(inp => { inp.value = '0'; });
+      if (typeof recalc === 'function') recalc();
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    });
   }
 });
-</script>
 
-<script>
-// header가 키보드 열려도 보이도록 조정
+// === 헤더가 키보드 열려도 보이도록 위치 조정 ===
 (function(){
   function adjustHeader() {
     const header = document.querySelector('header.incamart-top');
@@ -756,46 +775,8 @@ document.addEventListener('DOMContentLoaded', () => {
     ready();
   }
 })();
-</script>
 
-<style>
-@media (max-width: 640px){
-  header.incamart-top{
-    background: rgba(10,14,18,0.98) !important;
-    backdrop-filter: none;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
-  header.incamart-top::after{
-    content:"";
-    position:absolute; left:0; right:0; bottom:-6px; height:6px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.18), rgba(0,0,0,0));
-    pointer-events:none;
-  }
-  header.incamart-top .totals .box{ background: #111821; }
-}
-
-@media (max-width: 640px){
-  body.kb-open header.incamart-top{
-    padding: 6px 8px !important;
-  }
-  body.kb-open header.incamart-top h1{
-    font-size: 16px !important;
-    margin-bottom: 2px !important;
-  }
-  body.kb-open header.incamart-top .totals{
-    gap:6px !important;
-  }
-  body.kb-open header.incamart-top .totals .box{
-    padding: 6px 8px !important;
-  }
-  body.kb-open header.incamart-top .totals .v{
-    font-size: 16px !important;
-  }
-}
-</style>
-
-<script>
-// 제목 짧게 + 키보드 열림 상태 class
+// === 제목 짧게 + 키보드 열림 상태 class ===
 document.addEventListener('DOMContentLoaded', () => {
   const h1 = document.querySelector('header.incamart-top h1, h1');
   if (h1) h1.textContent = '(가격 자동 합산)';
@@ -815,47 +796,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 })();
 </script>
-
-<script>
-// 초기화 버튼 생성 & 동작
-document.addEventListener('DOMContentLoaded', () => {
-  const header = document.querySelector('header.incamart-top');
-  const totals = header ? header.querySelector('.totals') : null;
-  if (header && totals){
-    const actions = document.createElement('div');
-    actions.className = 'actions';
-    actions.innerHTML = '<button type="button" class="btn-reset" id="btn-reset">초기화</button>';
-    header.appendChild(actions);
-
-    document.getElementById('btn-reset').addEventListener('click', () => {
-      document.querySelectorAll('input.qty').forEach(inp => { inp.value = '0'; });
-      if (typeof recalc === 'function') recalc();
-      window.scrollTo({top: 0, behavior: 'smooth'});
-    });
-  }
-});
-</script>
-
-<style>
-/* 초기화 버튼 스타일 */
-header.incamart-top .actions{
-  margin-top:8px;
-  display:flex;
-  justify-content:flex-end;
-}
-header.incamart-top .btn-reset{
-  padding:8px 12px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.15);
-  background:#1a2432;
-  color:#e8f0f7;
-  font-weight:700;
-  font-size:14px;
-}
-header.incamart-top .btn-reset:active{
-  transform:translateY(1px);
-}
-</style>
 
 </body>
 </html>
